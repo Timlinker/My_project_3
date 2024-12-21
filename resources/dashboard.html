@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Панель управления</title>
+    <style>
+        #updateProfileForm, #logout {
+            max-width: 300px;
+            display: flex;
+            flex-direction: column;
+        }
+        label, input {
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Панель управления</h1>
+    <p id="welcome-message">Загрузка...</p>
+
+    <h2>Обновить профиль</h2>
+    <form id="updateProfileForm">
+        <label for="name">Новое имя</label>
+        <input type="text" id="name" name="name" placeholder="Введите ваше новое имя" required>
+
+        <label for="email">Новый Email</label>
+        <input type="email" id="email" name="email" placeholder="Введите новый email" required>
+
+        <button type="submit">Обновить профиль</button>
+    </form>
+
+    <button id="logout" style="margin-top: 20px;">Выйти</button>
+
+    <script>
+        async function loadDashboard() {
+            const response = await fetch('/dashboard');
+            const result = await response.json();
+            document.getElementById('welcome-message').textContent = result.message || result.error;
+        }
+
+        loadDashboard();
+
+        document.getElementById('logout').addEventListener('click', async function() {
+            const response = await fetch('/logout', { method: 'POST' });
+            const result = await response.json();
+            alert(result.message);
+            window.location.href = '/';
+        });
+
+        document.getElementById('updateProfileForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const data = Object.fromEntries(new FormData(e.target).entries());
+            const response = await fetch('/profile/update', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            alert(result.message || result.error);
+        };
+    </script>
+</body>
+</html>

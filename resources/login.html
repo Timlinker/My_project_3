@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Вход</title>
+    <style>
+        form {
+            max-width: 300px;
+            margin: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        label, input {
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Вход в систему</h1>
+    <form id="loginForm">
+        <label for="username">Логин</label>
+        <input type="text" id="username" name="username" placeholder="Введите логин" required>
+
+        <label for="password">Пароль</label>
+        <input type="password" id="password" name="password" placeholder="Введите пароль" required>
+
+        <button type="submit">Войти</button>
+    </form>
+
+    <p>Еще нет аккаунта? <a href="register.html">Зарегистрируйтесь здесь</a></p>
+
+    <script>
+        document.getElementById('loginForm').onsubmit = async (e) => 
+        {
+            e.preventDefault();
+            const data = Object.fromEntries(new FormData(e.target).entries());
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                alert(result.message);
+                window.location.href = '/dashboard.html'; // Перенаправляем на защищённую страницу
+            } else {
+                alert(result.error || 'Ошибка входа');
+            }
+        };
+    </script>
+</body>
+</html>

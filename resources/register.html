@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Регистрация</title>
+    <style>
+        form {
+            max-width: 300px;
+            display: flex;
+            flex-direction: column;
+        }
+        label, input {
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Регистрация</h1>
+    <form id="registerForm">
+        <label for="username">Логин</label>
+        <input type="text" id="username" name="username" placeholder="Введите логин" required>
+
+        <label for="password">Пароль</label>
+        <input type="password" id="password" name="password" placeholder="Введите пароль" required>
+
+        <label for="name">Имя</label>
+        <input type="text" id="name" name="name" placeholder="Введите ваше имя" required>
+
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="Введите ваш email" required>
+
+        <button type="submit">Зарегистрироваться</button>
+    </form>
+
+    <p>Уже зарегистрированы? <a href="login.html">Войдите здесь</a></p>
+
+    <script>
+        document.getElementById('registerForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const data = Object.fromEntries(new FormData(e.target).entries());
+            const response = await fetch('/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            alert(result.message || result.error);
+        };
+    </script>
+</body>
+</html>
