@@ -1,25 +1,30 @@
 package handlers;
-import com.sun.net.httpserver.HttpServer;
-import com.sun.net.httpserver.HttpHandler;
+
 import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import handlers.StaticFileHandler;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class RegisterHandler implements HttpHandler {
     private static final String FILE_PATH = "resources/users.json";
+    private static final String HTML_PATH = "resources/register.html";
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        if ("POST".equals(exchange.getRequestMethod())) {
-            // Чтение данных из тела запроса
+        if ("GET".equals(exchange.getRequestMethod())) {
+            // Возвращаем HTML-страницу регистрации
+            String html = Files.readString(Paths.get(HTML_PATH), StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
+            exchange.sendResponseHeaders(200, html.getBytes(StandardCharsets.UTF_8).length);
+            exchange.getResponseBody().write(html.getBytes(StandardCharsets.UTF_8));
+            exchange.close();
+        } else if ("POST".equals(exchange.getRequestMethod())) {
+            // Обработка данных регистрации
             String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
             JSONObject request = new JSONObject(body);
 
@@ -28,10 +33,10 @@ public class RegisterHandler implements HttpHandler {
             String name = request.getString("name");
             String email = request.getString("email");
 
-            // Загрузка существующих пользователей
+            // Чтение существующих пользователей
             JSONArray users = readUsersFromFile();
 
-            // Проверка, существует ли пользователь с таким логином
+            // Проверяем, существует ли пользователь с таким логином
             for (Object obj : users) {
                 JSONObject user = (JSONObject) obj;
                 if (user.getString("username").equals(username)) {
@@ -48,7 +53,7 @@ public class RegisterHandler implements HttpHandler {
             newUser.put("email", email);
             users.put(newUser);
 
-            // Сохранение пользователей в файл
+            // Сохранение в файл
             saveUsersToFile(users);
 
             sendResponse(exchange, 201, new JSONObject().put("message", "Регистрация прошла успешно."));
@@ -59,15 +64,14 @@ public class RegisterHandler implements HttpHandler {
 
     private JSONArray readUsersFromFile() throws IOException {
         if (!Files.exists(Paths.get(FILE_PATH))) {
-            // Если файл отсутствует, возвращаем пустой массив
             return new JSONArray();
         }
-        String content = new String(Files.readAllBytes(Paths.get(FILE_PATH)), StandardCharsets.UTF_8);
+        String content = Files.readString(Paths.get(FILE_PATH), StandardCharsets.UTF_8);
         return new JSONArray(content.isEmpty() ? "[]" : content);
     }
 
     private void saveUsersToFile(JSONArray users) throws IOException {
-        Files.write(Paths.get(FILE_PATH), users.toString(4).getBytes(StandardCharsets.UTF_8));
+        Files.writeString(Paths.get(FILE_PATH), users.toString(4), StandardCharsets.UTF_8);
     }
 
     private void sendResponse(HttpExchange exchange, int status, JSONObject response) throws IOException {
