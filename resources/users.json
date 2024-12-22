@@ -16,5 +16,11 @@
         "name": "hello",
         "email": "gello@hello",
         "username": "hello"
+    },
+    {
+        "password": "gamer",
+        "name": "gamer",
+        "email": "game@gamer.com",
+        "username": "gamer"
     }
 ]
