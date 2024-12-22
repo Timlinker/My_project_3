@@ -16,8 +16,8 @@ public class Main {
         String resourcesPath = "resources";
 
         // Обработчик для регистрации
-        server.createContext("/register.html", new RegisterHandler());
-        server.createContext("/login.html", new LoginHandler(sessionManager));
+        server.createContext("/register", new RegisterHandler());
+        server.createContext("/login", new LoginHandler(sessionManager));
         
         // Обработчик для статических файлов
         server.createContext("/", new StaticFileHandler(resourcesPath));
